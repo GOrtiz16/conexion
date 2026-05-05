@@ -19,14 +19,18 @@ jobs:
         run: |
           ENDPOINT="3FD81134248C71EB7F96492550274CF4.gr7.us-east-1.eks.amazonaws.com"
 
-          echo "IP pública:"
-          curl -s https://checkip.amazonaws.com
+          echo "== Runner hostname e IP interna =="
+          hostname || true
+          hostname -I || true
 
-          echo "DNS:"
+          echo "== IP pública del runner =="
+          curl -s --max-time 5 https://checkip.amazonaws.com || true
+
+          echo "== DNS =="
           nslookup $ENDPOINT || true
 
-          echo "TCP:"
-          timeout 5 bash -c "</dev/tcp/$ENDPOINT/443" && echo OK || echo FAIL
+          echo "== TCP 443 =="
+          timeout 5 bash -c "</dev/tcp/$ENDPOINT/443" && echo "TCP OK" || echo "TCP FAIL"
 
-          echo "CURL:"
-          curl -m 5 https://$ENDPOINT/version || true
+          echo "== HTTPS /version =="
+          curl -vk --max-time 10 https://$ENDPOINT/version || true
